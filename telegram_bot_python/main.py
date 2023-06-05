@@ -2,14 +2,15 @@ from telebot import types , telebot
 from datetime import datetime
 from info import weekday, week_numero, semester
 from telegram import InlineQueryResultArticle, InputTextMessageContent
-from weather import openweather , get_weather_emoji , openweather_by_city
+from weather import openweather , get_weather_emoji
 import requests, json
 
-bot_api = "" #Hide
+bot_api = "<Hide>" #Hide
 bot = telebot.TeleBot(bot_api)
 
 # In bot
 
+"""
 @bot.message_handler(commands=['start'])
 def start(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True,row_width=2)
@@ -28,108 +29,73 @@ def button_interact(message):
     elif message.text == 'University':
         info_university(message)
 
+"""        
+
 @bot.message_handler(commands=['weather'])
-def info_weather_by_city(message):
-    city = message.text.split('/weather')[1]
+def info_weather(message):
+    city = message.text.split('/weather')[1].strip()
 
-    data = openweather_by_city(city)
+    data = openweather(city)
 
-    if data == dict :
+    if isinstance(data, dict) :
         emoji = get_weather_emoji(data['Weather_report'])
 
-        text = f"""Current weather in {data['City']}:
+        text = f"""Current weather in {data['City'].capitalize()}:
 {emoji}{data['Weather_report'].capitalize()}
 💨Wind speed: {data['Speed']} m/s
 🌡Temperature: {data['Temperature']}°C
         """
 
     else:
-        text = "Wrong city"
+        text = f"Wrong city: {city}"
 
     bot.send_message(message.chat.id, text)
 
+@bot.message_handler(commands=['university', 'kbtu', 'semester' , 'sem'])
+def info_university(message):
+    sem = semester()[0]
+    cnt_w = week_numero()
+    day = weekday()
+    
+    text = f"""{sem} semester
+🕙Current week: {cnt_w}
+🗓Day of week: {day} 
+    """
 
+    # text = f"{temp:-^40}\n" + f"Semester: {sem}\n" + f"Current week: {week_n}\n" + f"Day of the week: {week_d}"
+    
+    bot.send_message(message.chat.id, text)
 
+# In chat
 
-#Functions
-def info_weather(message):
-    data = openweather()
+@bot.inline_handler(lambda query: len(query.query) == 0)
+def inline_handler(inline_query):
+    if True: # Output text
+        data = openweather('Almaty')
 
-    emoji = get_weather_emoji(data['Weather_report'])
+        emoji = get_weather_emoji(data['Weather_report'])
 
-    text = f"""Current weather in {data['City']}:
+        weather_text = f"""Current weather in {data['City'].capitalize()}:
 {emoji}{data['Weather_report'].capitalize()}
 💨Wind speed: {data['Speed']} m/s
 🌡Temperature: {data['Temperature']}°C
         """
 
-    bot.send_message(message.chat.id, text)
-    #
-
-def info_university(message):
-    temp = "KBTU"
-    sem = semester()[0]
-    week_n = week_numero()
-    week_d = weekday()
+        sem = semester()[0]
+        cnt_w = week_numero()
+        day = weekday()
     
-    text2 = f"""{sem} semester
-🕙Current week: {week_n}
-🗓Day of week: {week_d} 
-    """
+        university_text = f"""{sem} semester
+🕙Current week: {cnt_w}
+🗓Day of week: {day} 
+    """  
 
-    # text = f"{temp:-^40}\n" + f"Semester: {sem}\n" + f"Current week: {week_n}\n" + f"Day of the week: {week_d}"
-    
-    bot.send_message(message.chat.id, text2)
+    try:
+        r1 = types.InlineQueryResultArticle('1', 'Weather', types.InputTextMessageContent(weather_text))
+        r2 = types.InlineQueryResultArticle('2', 'University', types.InputTextMessageContent(university_text))
+        bot.answer_inline_query(inline_query.id, [r1, r2])
+    except Exception as e:
+        print(e)
 
-""" 
-# INLINE FUNCTIONS (Вызываемые в чате), OLD FUNCTIONS NEED TO CHANGE
-@bot.inline_handler(func=lambda query: query.query == "weather")
-def info_weather2(query):
-    base_url = "https://api.openweathermap.org/data/2.5/weather?"
-    city = "Almaty,KZ"
-    api_key = "" #Hide
-
-    url = base_url + "q=" + city + "&appid=" + api_key + "&units=metric" + "&lang=eng"
-
-    response = requests.get(url)
-
-    if response.status_code == 200: 
-        data = response.json()
-
-        main = data['main']
-
-        temperature = main['temp']
-        speed = data["wind"]["speed"]
-        weather_report = data['weather']
-
-        text = f"{city:-^40}"+ f"\nTemperature: {temperature}°C" + f"\nWind speed: {speed} m/s" + "\nWeather report:" + weather_report[0]['description']
-    
-    result = telebot.types.InlineQueryResultArticle(
-            id='1',
-            title='Weather in Almaty',
-            input_message_content=telebot.types.InputTextMessageContent(message_text=text)
-        )
-
-        # Отправка результатов в ответ на inline-запрос
-    bot.answer_inline_query(query.id, [result])
-
-@bot.inline_handler(func=lambda query: query.query == "kbtu")
-def info_university2(query):
-    temp = "KBTU"
-    sem = semester()[0]
-    week_n = week_numero()
-    week_d = weekday()
-    
-    text = f"{temp:-^40}\n" + f"Semester: {sem}\n" + f"Current week: {week_n}\n" + f"Day of the week: {week_d}"
-    
-    result = telebot.types.InlineQueryResultArticle(
-            id='1',
-            title='Info KBTU',
-            input_message_content=telebot.types.InputTextMessageContent(message_text=text)
-        )
-
-        # Отправка результатов в ответ на inline-запрос
-    bot.answer_inline_query(query.id, [result])
-"""
 
 bot.polling(none_stop=True, interval=0)

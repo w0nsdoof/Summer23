@@ -1,6 +1,6 @@
 import json , requests
 
-apikey = ""
+api_key = "<Hide>" # Hide 
 
 def get_weather_emoji(weather_report):
     emoji_dict = {
@@ -29,10 +29,8 @@ def get_weather_emoji(weather_report):
 
     return emoji
 
-def openweather():
+def openweather(city):
     base_url = "https://api.openweathermap.org/data/2.5/weather?"
-    city = "Almaty"
-    api_key = apikey
 
     url = base_url + "q=" + city + "&appid=" + api_key + "&units=metric" + "&lang=eng"
 
@@ -43,33 +41,7 @@ def openweather():
 
         main = data['main']
 
-        temperature = main['temp']
-        speed = data["wind"]["speed"]
-        weather_report = data['weather'][0]['description']
-
-        result = {
-            "City" : city ,
-            "Temperature" : temperature ,
-            "Speed" : speed ,
-            "Weather_report" : weather_report
-        }
-        return result
-    else:
-        print("Error in HTTP request")
-
-def openweather_by_city(city):
-    base_url = "https://api.openweathermap.org/data/2.5/weather?"
-    api_key = apikey
-
-    url = base_url + "q=" + city + "&appid=" + api_key + "&units=metric" + "&lang=eng"
-
-    response = requests.get(url)
-
-    if response.status_code == 200: 
-        data = response.json()
-
-        main = data['main']
-
+        city = data['name']
         temperature = main['temp']
         speed = data["wind"]["speed"]
         weather_report = data['weather'][0]['description']
