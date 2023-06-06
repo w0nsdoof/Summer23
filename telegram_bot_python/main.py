@@ -1,11 +1,11 @@
 from telebot import types , telebot
 from datetime import datetime
-from info import weekday, week_numero, semester
+from university import weekday, week_numero, semester
 from telegram import InlineQueryResultArticle, InputTextMessageContent
 from weather import openweather , get_weather_emoji
 import requests, json
 
-bot_api = "<Hide>" #Hide
+bot_api = "" #Hide
 bot = telebot.TeleBot(bot_api)
 
 # In bot
@@ -66,7 +66,37 @@ def info_university(message):
     
     bot.send_message(message.chat.id, text)
 
+@bot.message_handler(commands=['kaspi', 'реквизиты' , 'donate' , 'payment', 'платежи'])
+def payment(message):
+    bank_card = '' # Hide
+
+    text = f"🥤На энергосы: {bank_card}"
+
+    bot.send_message(message.chat.id , text)
 # In chat
+
+@bot.message_handler(commands=['help'])
+def help(message):
+    # What bot can do
+    # Weaher by city, University info , Inline call
+
+    text = f"""What can this bot do?:
+· Check the Weather of any city:
+Example: /weather Almaty or /weather алматы 
+    Current weather in Almaty:
+    ☁️Overcast clouds
+    💨Wind speed: 4 m/s
+    🌡Temperature: 22.95°C
+· Check the current semester/week numero/day of the week:
+Example: /university , /kbtu , /semester , /sem
+    🌴Summer semester
+    🕙Current week: 0
+    🗓Day of week: Monday
+💵 Also you can donate smth to me:
+/kaspi , /payment , /donate 
+"""
+    
+    bot.send_message(message.chat.id, text)
 
 @bot.inline_handler(lambda query: len(query.query) == 0)
 def inline_handler(inline_query):

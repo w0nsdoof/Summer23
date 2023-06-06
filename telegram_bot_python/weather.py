@@ -1,6 +1,6 @@
 import json , requests
 
-api_key = "<Hide>" # Hide 
+api_key = "" # Hide 
 
 def get_weather_emoji(weather_report):
     emoji_dict = {
@@ -28,6 +28,7 @@ def get_weather_emoji(weather_report):
     emoji = emoji_dict.get(weather_report, "")
 
     return emoji
+
 
 def openweather(city):
     base_url = "https://api.openweathermap.org/data/2.5/weather?"
